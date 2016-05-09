@@ -14,11 +14,7 @@
     "noPrintTimeoutSecs": 10
   },
   "snapper": {
-    "imageBasePath": "/home/pi/whe/emitter/snapper/images/"
-  },
-  "sniffer": {
-    "dataFilename": "/tmp/sniffer-data.json",
-    "dataCsvPrefix": "/tmp/sniffer-data-csv"
+    "imageBasePath": "/home/pi/birdsnapper/emitter/snapper/images/"
   },
   "heartbeatIntervalSecs": 1,
   "maxNumSecsBeforeRender": 2,

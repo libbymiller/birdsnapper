@@ -18,12 +18,12 @@ sudo make install
 sudo apt-get install libopencv-dev python-opencv
 
 cd
-cp -r /opt/vc/userland/host_applications/linux/apps/raspicam/*  whe/emitter/snapper/
+cp -r /opt/vc/userland/host_applications/linux/apps/raspicam/*  birdsnapper/emitter/snapper/
 
 cp CMakeLists.txt.snapper CMakeLists.txt
 
 cmake .
 make
-./camcv_vid3
+./birdsnapper
 
 

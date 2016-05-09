@@ -70,7 +70,7 @@ app.use( cors() );
 */
 app.use( multer(
     {
-       dest: '/home/pi/whe/collector/api/uploads/',
+       dest: '/home/pi/birdsnapper/collector/api/uploads/',
        onFileUploadComplete: function (file, req, res) {
          console.log(file.fieldname + ' uploaded to  ' + file.path)
        }

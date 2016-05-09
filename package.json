@@ -1,21 +1,21 @@
 {
-  "name": "whe",
+  "name": "birdsnapper",
   "version": "0.0.0",
-  "description": "Walls Have Eyes installation",
+  "description": "Birdsnapper",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/libbymiller/whe.git"
+    "url": "https://github.com/libbymiller/birdsnapper.git"
   },
   "author": "",
   "license": "Apache-2",
   "bugs": {
-    "url": "https://github.com/libbymiller/whe/issues"
+    "url": "https://github.com/libbymiller/birdsnapper/issues"
   },
-  "homepage": "https://github.com/libbymiller/whe",
+  "homepage": "https://github.com/libbymiller/birdsnapper",
   "dependencies": {
     "express": "~4.11.2",
     "faye": "~1.1.0",
