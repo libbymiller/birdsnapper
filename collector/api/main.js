@@ -9,7 +9,6 @@ var http    = require('http'),
 
 var Metadata = require('./lib/metadata'),
     Images   = require('./lib/images'),
-    MacAddressLookup = require('../macs/main')(),
     config   = require('../../shared/config'),
     excl     = require('../../shared/exclusions');
 
@@ -71,6 +70,7 @@ app.use( cors() );
 */
 app.use( multer(
     {
+       dest: '/home/pi/whe/collector/api/uploads/',
        onFileUploadComplete: function (file, req, res) {
          console.log(file.fieldname + ' uploaded to  ' + file.path)
        }
@@ -149,50 +149,7 @@ function obfuscateAddress(addrStr) {
 
 // Wifi data from emitters
 app.post('/metadata', function (req, res) {
-  var data;
-  if (req.body && req.body.data) {
-    data = req.body.data;
-
-    console.log('Received metadata', data);
-
-    // We get an array of wifi metadata
-    // perform a lookup on each one
-    promises = data.map(performMacAddressLookup);
-
-    // When the lookups are finished, we get an array
-    // of data back
-    Promise.all(promises)
-      .then(function(data) {
-        // Remove any empty items from array
-        data = _.compact(data);
-
-        // // The first item is the primary data
-        // var primary = _.first(data),
-        //     // The MAC addresses in the tail are "friends"
-        //     friends = _.rest(data);
-
-        // primary.friends = friends;
-        // metadata.replace(primary);
-
-        data = data.map(function (datum) {
-          datum.power = datum.power ? parseInt(datum.power, 10) : null;
-          datum.time = datum.time   ? parseInt(datum.time, 10)  : null;
-          return datum;
-        });
-
-        // Remove all data in model and replace with new
-        // array of data
-        metadata.reset(data);
-
-        incrementRenderCounter();
-      })
-      .catch(function (err) {
-        console.error('Error performing lookups', err);
-      });
-
-  } else {
-    console.error('No metadata in POST body', req.body);
-  }
+  //nothing for this versiob
   res.sendStatus(202);
 });
 
@@ -223,7 +180,6 @@ app.get('/image/latest/:source', function (req, res) {
 //libby
 
 function libbyLatestImages(source) {
-  console.log("\n\n\nZZZZZZZZZZZ");
 
   var images_list = [];
   console.log("latest images");

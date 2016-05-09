@@ -52,13 +52,9 @@ var ImagesComponent = Ractive.extend({
   //}
 });
 
-var RecentDevicesComponent = Ractive.extend({ template: '#ui-recent-devices' });
 
 Ractive.components = {
   View: ViewComponent,
-  Devices: Ractive.extend({ template: '#ui-devices' }),
-  ImageTotals: Ractive.extend({ template: '#ui-image-totals' }),
   Images: ImagesComponent,
-  RecentDevices: RecentDevicesComponent,
   Credits: Ractive.extend({ template: '#ui-credits' })
 };

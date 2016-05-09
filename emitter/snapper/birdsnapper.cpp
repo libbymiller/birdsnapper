@@ -132,6 +132,9 @@ typedef struct
    int graymode;                        /// capture in gray only (2x faster)
    int immutableInput;      /// Flag to specify whether encoder works in place or creates a new buffer. Result is preview can display either
                                        /// the camera output or the encoder output (with compression artifacts)
+   int vflip;
+   int hflip;
+
    RASPIPREVIEW_PARAMETERS preview_parameters;   /// Preview setup parameters
    RASPICAM_CAMERA_PARAMETERS camera_parameters; /// Camera setup parameters
 
@@ -185,14 +188,19 @@ static void default_status(RASPIVID_STATE *state)
 //   state->width                         = 320;      // use a multiple of 320 (640, 1280)
 //   state->height                        = 240;          // use a multiple of 240 (480, 960)
 
-   state->width                         = 640;      // use a multiple of 320 (640, 1280)
-   state->height                        = 480;          // use a multiple of 240 (480, 960)
+//3280 x 2464  ??
+
+   state->width                         = 1280;      // use a multiple of 320 (640, 1280)
+   state->height                        = 960;          // use a multiple of 240 (480, 960)
+  // state->width                         = 1920;      // use a multiple of 320 (640, 1280)
+  // state->height                        = 1080;          // use a multiple of 240 (480, 960)
 
    state->bitrate                       = 17000000; // This is a decent default bitrate for 1080p
    state->framerate             = VIDEO_FRAME_RATE_NUM;
    state->immutableInput        = 1;
-   state->graymode                      = 1;            //gray by default, much faster than color (0), mandatory for face reco
-
+//   state->graymode                      = 0;            //gray by default, much faster than color (0), mandatory for face reco
+   state->vflip = 0;
+   state->hflip = 0;
    // Setup preview window defaults
    raspipreview_set_defaults(&state->preview_parameters);
 
@@ -260,10 +268,25 @@ static void video_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffe
                 int w=pData->pstate->width;     // get image size
                 int h=pData->pstate->height;
                 int h4=h/4;
-                memcpy(py->imageData,buffer->data,w*h); // read Y
-                // for face reco, we just keep gray channel, py
 
-////// movement detection
+                memcpy(py->imageData,buffer->data,w*h); // read Y
+
+                memcpy(pu->imageData,buffer->data+w*h,w*h4); // read U
+                memcpy(pv->imageData,buffer->data+w*h+w*h4,w*h4); // read v
+
+                cvResize(pu, pu_big, CV_INTER_NN);
+                cvResize(pv, pv_big, CV_INTER_NN);  //CV_INTER_LINEAR looks better but it's slower
+                cvMerge(py, pu_big, pv_big, NULL, image);
+
+                cvCvtColor(image,dstImage,CV_YCrCb2RGB);        // convert in RGB color space (slow)
+
+
+//		memcpy(pu_big->imageData,buffer->data,w*h); // read U
+//		memcpy(pv_big->imageData,buffer->data,w*h); // read v
+//or frame?
+//		cvMerge(py, pu_big, pv_big, NULL, dstImage);
+  //              cvCvtColor(dstImage,image,CV_YCrCb2RGB);
+                ////// movement detection
 
                 if(!pylast){
                   cvCopy(py, pylast, NULL);
@@ -273,67 +296,23 @@ static void video_buffer_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffe
                 cvCanny(pydiff, pydiff, 20, 60, 3);
                 int n = cvCountNonZero(pydiff);
 
-                if(n>1000){
+                if(n>5000){
                   fprintf(stdout, "MOTION DETECTED (%d)\n", n);
                   curl_post();
-                  sleep(5);
+                  sleep(100);
                 }
 
                 cvCopy(py, pylast, NULL);
 
                 gray=cvarrToMat(py);
+                img_rgb=cvarrToMat(dstImage);
 
                 //cvShowImage("camcvWin", py); // display only gray channel
 
 
-
-////////////////////////////////
-// FACE RECOGNITION START HERE
-////////////////////////////////
-
-                // detect faces
-                face_cascade.detectMultiScale(gray, faces, 1.1, 3, CV_HAAR_SCALE_IMAGE, Size(80,80));
-                if(faces.size()>0){
-                   trace("found faces");
-                }else{
-//                 trace("NO faces");
-                }
-
-
-                for(int i = 0; i < faces.size(); i++) {
-		  // crop face (pretty easy with opencv, don't you think ? 
-                  Rect face_i = faces[i];
-                  face = gray(face_i);  
-                  //resized face and display it
-                  cv::resize(face, face_resized, Size(im_width, im_height), 1.0, 1.0, CV_INTER_NN); //INTER_CUBIC);		
-
-                // convert to colour to display a green box on top
-                // read image
-//                cv::Mat img_gray = imread(path,0);
-
-                // create 8bit color image. IMPORTANT: initialize image otherwise it will result in 32F
-                //cv::Mat img_rgb(gray.size(), CV_8UC3);
-
-                // convert grayscale to color image
-                cv::cvtColor(gray, img_rgb, CV_GRAY2RGB);
-
-		// create a rectangle around the face 
-		//rectangle(gray, face_i, CV_RGB(255, 255 ,255), 1);
-//		rectangle(gray, face_i, CV_RGB(0, 255,0), 1);
-		rectangle(img_rgb, face_i, CV_RGB(0, 255,0), 1);
-	} // end for
-
-
-/////////////////////////
-// END OF FACE RECO
-/////////////////////////
         // Show the result:
         //imshow("camcvWin", gray);
-        if(faces.size()>0){
-          imwrite( "/home/pi/whe/emitter/snapper/images/camcvface.jpg", img_rgb );
-        }else{
-          imwrite( "/home/pi/whe/emitter/snapper/images/camcvimage.jpg", gray );
-        }
+        imwrite( "/home/pi/whe/emitter/snapper/images/camcvimage.jpg", img_rgb );
         key = (char) waitKey(1);
         nCount++;               // count frames displayed
 
@@ -651,6 +630,7 @@ int main(int argc, const char **argv)
         int w=state.width;
         int h=state.height;
         dstImage = cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 3);
+
         py = cvCreateImage(cvSize(w,h), IPL_DEPTH_8U, 1);               // Y component of YUV I420 frame
         pu = cvCreateImage(cvSize(w/2,h/2), IPL_DEPTH_8U, 1);   // U component of YUV I420 frame
         pv = cvCreateImage(cvSize(w/2,h/2), IPL_DEPTH_8U, 1);   // V component of YUV I420 frame

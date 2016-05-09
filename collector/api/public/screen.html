@@ -77,25 +77,6 @@
       <p>&copy; 2015 BBC Research and Development</p>
     </View>
   </script>
-  <script id="ui-recent-devices" type="text/ractive">
-    <View name="recent-devices">
-      <h2 class="hd">
-        <img src="/images/icons/devices.svg" />
-        Most Recent Devices
-      </h2>
-      <div class="scrollable-frame">
-        <table>
-          {{#recentDevices}}
-            <tr>
-              <td>{{shortName}}</td>
-              <td>{{id}}</td>
-              <td>{{aps}}</td>
-            </tr>
-          {{/recentDevices}}
-        </table>
-      </div>
-    </View>
-  </script>
   <script id="ui-images" type="text/ractive">
     <View name="images">
       {{#randomImages:index}}
@@ -105,55 +86,15 @@
       {{/randomImagesImages}}
     </View>
   </script>
-  <script id="ui-image-totals" type="text/ractive">
-    <View name="image-totals">
-      <p class="metric">
-        <span class="value">{{imageCount}}</span>
-        images captured
-      </p>
-      <p class="metric">
-<!--        <span class="value">{{totalCameras}}</span>-->
-       <span class="value">1</span>
-         hidden camera
-      </p>
-    </View>
-  </script>
-  <script id="ui-devices" type="text/ractive">
-    <View name="devices">
-      <h2 class="hd">
-        <img src="/images/icons/devices.svg" />
-        Total devices
-      </h2>
-      <div class="scrollable-frame">
-        <table>
-          {{#deviceTotalsByManufacturer:key}}
-            <tr>
-              <td>{{name}}</td>
-              <td>{{count}}</td>
-            </tr>
-          {{/}}
-          <tr>
-            <td>Total</td>
-            <td>{{totalDevices}}</td>
-          </tr>
-        </table>
-      </div>
-    </View>
-  </script>
   <script id="ui-template" type="text/ractive">
     <div class="wrapper">
       <Images></Images>
-      <Devices></Devices>
-      <RecentDevices></RecentDevices>
-      <ImageTotals></ImageTotals>
-      <div class="new-data">
-        <div class="new-data-inner {{ isTriggering ? 'flyInBottom' : '' }}">
-          New data received
-        </div>
-      </div>
     </div><!-- .wrapper -->
   </script>
+
   <script src="js/components.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
+
+
